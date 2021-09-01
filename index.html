@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Player</title>
+    <link rel="stylesheet" href="./css/font.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    
+    
+</head>
+<body>
+<div class="main">
+    <p id="logo"><i class="fa fa-music" aria-hidden="true"> music</i>
+    </p>
+
+    <!-- Left part -->
+    <div class="left">
+
+        <!-- Song image -->
+        <img id="track_image">
+        <div class="volume">
+        
+            <p id="volume_show">90</p>
+            <i class="fa fa-volume-up" aria-hidden="true" id="volume_icon" onclick="mute_sound()"></i>
+            <input type="range" min="0" max="100" value="90" onchange="volum_change()">
+
+        </div>
+
+    </div>
+
+    <!--
+        right part
+    -->
+    <div class="right">
+        <div class="show_song_no">
+            <p id="present">1</p>
+            <p>/</p>
+            <p id="total">5</p>
+        </div>
+        <!-- Song title -->
+        <p id="title">title.mp3</p>
+        <p id="artist">Artist name</p>
+
+        <!-- middle part -->
+        <div class="middle">
+            <button onclick="previous_song()" id="pre">
+                <i class="fa fa-step-backward" aria-hidden="true"></i>
+            </button>
+            <button onclick="justplay()" id="play">
+                <i class="fa fa-play" aria-hidden="true"></i>
+            </button>
+            <button onclick="next_song()" id="next">
+                <i class="fa fa-step-forward" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <!--
+            song duration part
+        -->
+        <div class="duration">
+            <input type="range" min="0" max="100" value="0" id="duration_slider" onchange="change_duration()">
+        </div>
+        <button id="auto" onclick="autoplay_switch()">Auto play <i class="fa fa-circle-o" aria-hidden="true"></i>
+        </button>
+    </div>
+</div>
+
+
+<script>
+    let previous = document.querySelector('#pre');
+let play = document.querySelector('#play');
+let next = document.querySelector('#next');
+let title = document.querySelector('#title');
+let recent_volume = document.querySelector('#volume');
+let volume_show = document.querySelector('#volume_show');
+let slider = document.querySelector('#duration_slider');
+let show_duration = document.querySelector('#show_duration');
+let track_image = document.querySelector('#track_image');
+let auto_play = document.querySelector('#auto');
+let present = document.querySelector('#present');
+let total = document.querySelector('#total');
+let artist = document.querySelector('#artist');
+
+let timer;
+let autoplay = 0;
+
+let index_no = 0;
+let playing_song = false;
+
+let track = document.createElement('audio');
+
+
+let All_song = [
+    {
+    name: "first song",
+    path: './music/song1.mp3',
+    img: './img/img1.jpg',
+    singer: "first singer"
+    },
+    {
+        name: "second song",
+        path: './music/song2.mp3',
+        img: './img/img2.jpg',
+        singer: "second singer"
+    },
+    {
+        name: "third song",
+        path: './music/song3.mp3',
+        img: './img/img3.jpg',
+        singer: "third singer"
+    },
+    {
+        name: "fourth song",
+        path: './music/song4.mp3',
+        img: './img/img4.jpg',
+        singer: "fourth singer"
+    },
+    {
+        name: "fifth song",
+        path: './music/song5.mp3',
+        img: './img/img5.jpg',
+        singer: "fifth singer"
+    }
+];
+
+
+function load_track(index_no) {
+    clearInterval(timer);
+    reset_slider();
+    track.src = All_song[index_no].path;
+    title.innerHTML = All_song[index_no].name;
+    track_image.src = All_song[index_no].img;
+    artist.innerHTML = All_song[index_no].singer;
+    track.load();
+
+    total.innerHTML = All_song.length;
+    present.innerHTML = index_no + 1;
+    timer = setInterval(range_slider , 1000);
+}
+load_track(index_no);
+
+function mute_sound() {
+    track.volume = 0;
+    volume.value = 0;
+    volume_show.innerHTML = 0;
+}
+
+
+function reset_slider() {
+    slider.value = 0;
+}
+
+
+function justplay() {
+    if(playing_song == false) {
+        playsong();
+    }else {
+        pausesong();
+    }
+}
+
+function playsong() {
+    track.play();
+    playing_song = true;
+    play.innerHTML = '<i class="fa fa-pause"></i>';
+}
+
+function pausesong() {
+    track.pause();
+    playing_song = false;
+    play.innerHTML = '<i class="fa fa-play"></i>';
+}
+
+function next_song() {
+    if(index_no < All_song.length - 1){
+        index_no += 1;
+        load_track(index_no);
+        playsong();
+    }else{
+        index_no = 0;
+        load_track(index_no);
+        playsong();
+    }
+}
+
+function previous_song() {
+    if(index_no > 0) {
+        index_no -= 1;
+        load_track(index_no);
+        playsong();
+    }else{
+        index_no = All_song.length;
+        load_track(index_no);
+        playsong();
+    }
+}
+
+function volum_change() {
+    volume_show.innerHTML = recent_volume.value;
+    track.volume = recent_volume.value / 100;
+}
+
+function change_duration() {
+    slider_position = track.duration * (slider.value / 100);
+    track.currentTime = slider_position;
+
+}
+
+function autoplay_switch() {
+    if(autoplay==1) {
+        autoplay=0;
+        autop_lay.style.background = "rgba(255,255,255,0.2";
+    }else{
+        autoplay = 1;
+        auto_play.style.background = "#FF8A65";
+    }
+}
+
+function range_slider() {
+    let position = 0;
+
+    if(!isNaN(track.duration)) {
+        position = track.currentTime * (100 / track.duration);
+        slider.value = position;
+    }
+}
+
+if(track.ended){
+    play.innerHTML = '<i class="fa fa-play"></i>';
+    if(autoplay==1){
+        index_no += 1;
+        load_track(index_no);
+        playsong();
+    }
+}
+</script>
+
+
+</body>
+</html>
